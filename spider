@@ -1,0 +1,41 @@
+# -*-coding:utf-8*-
+
+#引入模块
+import requests
+from bs4 import BeautifulSoup
+import csv
+import json
+import codecs
+
+#函数获取URL源代码
+def getHTML(url):
+  req = requests.get(url)
+  r = req.content
+  return r
+
+#函数分析HTML并且获取数据保存到列表里  
+def parseHTML(html):
+  data = json.loads(html)
+  list_all = data['data']
+  for i in range(1,40):
+    list_det = list_all['list'][i]['m_summary']
+    list_topic = list_all['list'][i]['m_title']
+    list_url = list_all['list'][i]['m_display_url']
+    #print "%d>>>topic:%s\n    des:%s\n    url:%s" %(i,list_topic,list_det,list_url)
+    yield list_topic
+  	
+#将获取的数据保存到csv文件中
+def writeCSV(date_list):
+  with codecs.open('test.csv','wb') as f:
+    writer = csv.writer(f)
+    for data in date_list:
+      writer.writerow(data)
+      
+
+#主函数      
+if __name__ == "__main__":
+  URL = 'http://baijia.baidu.com/ajax/labellatestarticle?page=1&pagesize=40&prevarticalid=552100&flagtogether=1&labelid=3'
+  html = getHTML(URL)
+  date_list = parseHTML(html)
+  writeCSV(date_list)
+
